@@ -26,3 +26,12 @@ for batch_index in range(num_batches):
 
     grads = tape.gradient(loss, model.variables)
     optimizer.apply_gradients(grads_and_vars=zip(grads, model.variables))
+
+SparseCategoricalAccuracy = tf.keras.metrics.SparseCategoricalAccuracy()
+num_batches = int(dataLoader.num_test_data // batch_size)
+for batch_index in range(num_batches):
+    start_index, end_index = batch_index * batch_size, (batch_index + 1) * batch_size
+    y_estimate = model.predict(dataLoader.test_data[start_index:end_index])
+    SparseCategoricalAccuracy.update_state(y_true=dataLoader.test_label[start_index:end_index], y_pred=y_estimate)
+
+print(SparseCategoricalAccuracy.result())

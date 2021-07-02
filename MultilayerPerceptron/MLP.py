@@ -12,7 +12,7 @@ class MLP(tf.keras.Model):
         # 创建10个神经元的输出层
         self.dense2 = tf.keras.layers.Dense(units=10)
 
-    def call(self, inputs):
+    def call(self, inputs, **kwargs):
         x = self.flatten(inputs)
         x = self.dense1(x)
         x = self.dense2(x)
