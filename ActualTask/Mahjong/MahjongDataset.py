@@ -50,7 +50,7 @@ class MahjongDataSet:
     # Singe Image Read as Tensor to Resize to 64*64
     def decode_and_resize(self, filename, label, enhance=True):
         img = tf.io.read_file(filename, 'r')
-        img = tf.image.decode_jpeg(img, channels=1)
+        img = tf.image.decode_jpeg(img, channels=3)
         img = tf.cast(tf.image.resize(img, self.resize_shape), dtype=tf.float32)
         if enhance:
             img = tf.image.random_brightness(img, max_delta=50.)
