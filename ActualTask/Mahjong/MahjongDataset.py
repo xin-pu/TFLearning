@@ -8,7 +8,7 @@ def get_dataset_list(folder):
     sub_dirs = [r[0] for r in os.walk(folder)]
     sub_dirs.remove(sub_dirs[0])
     for dire in sub_dirs:
-        label = int(dire.split("\\")[-1])
+        label = int(dire.split("\\")[-1]) - 1
         files = [r[2] for r in os.walk(dire)][0]
         for file in files:
             file_fullname = os.path.join(dire, file)
@@ -42,6 +42,7 @@ class MahjongDataSet:
         train_dataset = train_dataset.map(
             map_func=self.decode_and_resize,
             num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
         train_dataset = train_dataset.shuffle(buffer_size=1024)
         train_dataset = train_dataset.batch(batch_size=self.batch_size)
         train_dataset = train_dataset.prefetch(tf.data.experimental.AUTOTUNE)
@@ -50,13 +51,15 @@ class MahjongDataSet:
     # Singe Image Read as Tensor to Resize to 64*64
     def decode_and_resize(self, filename, label, enhance=True):
         img = tf.io.read_file(filename, 'r')
-        img = tf.image.decode_jpeg(img, channels=3)
+        img = tf.image.decode_jpeg(img, channels=1)
         img = tf.cast(tf.image.resize(img, self.resize_shape), dtype=tf.float32)
         if enhance:
             img = tf.image.random_brightness(img, max_delta=50.)
-            img = tf.image.random_saturation(img, lower=0.5, upper=1.5)
-            img = tf.image.random_hue(img, max_delta=0.2)
             img = tf.image.random_contrast(img, lower=0.5, upper=1.5)
+            img = tf.image.random_flip_up_down(img)
+            # 使用数据增强时，单通道图像加入以下两种增加方式，会因为通道问题报错
+            # img = tf.image.random_saturation(img, lower=0.5, upper=1.5)
+            # img = tf.image.random_hue(img, max_delta=0.2)
         img = tf.clip_by_value(img, 0, 255)
         img /= 255
         return img, label
@@ -64,5 +67,5 @@ class MahjongDataSet:
 
 if __name__ == "__main__":
     dataset = MahjongDataSet()
-    print(dataset.test_dataset)
-    print(len(dataset.train_dataset))
+    for elem in dataset.test_dataset:
+        print(elem)

@@ -38,3 +38,10 @@ class CNN(tf.keras.Model):
 
     def get_config(self):
         return dict()
+
+
+if __name__ == "__main__":
+    test_x = tf.ones([1, 64, 64, 1])
+    model = CNN()
+    test_y = model(test_x)
+    print(test_y)

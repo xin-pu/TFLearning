@@ -7,7 +7,7 @@ class MLP(tf.keras.Model):
         super().__init__()
         self.flatten = tf.keras.layers.Flatten()
         self.dense1 = tf.keras.layers.Dense(units=100, activation=tf.nn.relu)
-        self.dense2 = tf.keras.layers.Dense(units=10)
+        self.dense2 = tf.keras.layers.Dense(units=8)
 
     def call(self, inputs, **kwargs):
         x = self.flatten(inputs)
