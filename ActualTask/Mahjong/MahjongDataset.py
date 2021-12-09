@@ -8,7 +8,7 @@ def get_dataset_list(folder):
     sub_dirs = [r[0] for r in os.walk(folder)]
     sub_dirs.remove(sub_dirs[0])
     for dire in sub_dirs:
-        label = int(dire.split("\\")[-1]) - 1
+        label = int(dire.split("\\")[-1])
         files = [r[2] for r in os.walk(dire)][0]
         for file in files:
             file_fullname = os.path.join(dire, file)
@@ -25,9 +25,11 @@ class MahjongDataSet:
     def __init__(self,
                  batch_size=24,
                  resize_shape=(64, 64),
-                 val_per=0.2):
+                 val_per=0.3,
+                 train_folder=r"D:\DataSets\Mahjong\train-all"):
         self.batch_size = batch_size
         self.resize_shape = resize_shape
+        self.train_folder = train_folder
 
         train_dataset = self.get_data(self.train_folder)
         data_count = len(train_dataset)
@@ -60,12 +62,9 @@ class MahjongDataSet:
             # 使用数据增强时，单通道图像加入以下两种增加方式，会因为通道问题报错
             # img = tf.image.random_saturation(img, lower=0.5, upper=1.5)
             # img = tf.image.random_hue(img, max_delta=0.2)
-        img = tf.clip_by_value(img, 0, 255)
-        img /= 255
-        return img, label
+        img /= 255.
+        return img, label - 1
 
 
 if __name__ == "__main__":
-    dataset = MahjongDataSet()
-    for elem in dataset.test_dataset:
-        print(elem)
+    dataset = MahjongDataSet(resize_shape=(128, 128))
