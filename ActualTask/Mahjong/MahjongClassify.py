@@ -45,7 +45,7 @@ early_stopping = EarlyStopping(monitor='val_loss',
                                patience=2,
                                verbose=1)
 
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=init_learning_rate),
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=init_learning_rate, amsgrad=True),
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=[tf.keras.metrics.sparse_categorical_accuracy])
 
