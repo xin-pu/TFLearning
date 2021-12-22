@@ -20,6 +20,7 @@
 
 ```
     python -m tf2onnx.convert --saved-model D:\DataSets\Model --output resnet50.onnx
+    python -m tf2onnx.convert --saved-model D:\DataSets\GrabModule\Model --output grab.onnx
 ```
 
 ##### windows + Python3.8 直接转换很慢的处理办法

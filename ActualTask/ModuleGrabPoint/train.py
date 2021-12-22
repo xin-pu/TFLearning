@@ -8,7 +8,7 @@ from ActualTask.ModuleGrabPoint.model import GraveModel
 init_learning_rate = 0.01
 size_pattern = 416
 batch_size = 2
-model_dir = r'D:\DataSets\GrabModule\Model'
+model_dir = r'D:\DataSets\GrabModule\ResModel'
 
 # Step 1, Prepare Data
 train_dataset = GrabDataSet(batch_size=batch_size,
@@ -45,7 +45,7 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=init_learning_rat
 model.fit(
     train_dataset.train_dataset,
     validation_data=train_dataset.test_dataset,
-    epochs=50,
+    epochs=20,
     initial_epoch=0,
     callbacks=[reduce_lr, checkpoint])
 

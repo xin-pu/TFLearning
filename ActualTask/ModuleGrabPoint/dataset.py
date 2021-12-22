@@ -56,7 +56,7 @@ class GrabDataSet:
         img = tf.io.decode_jpeg(img, channels=1)
         img = tf.image.resize(img, [416, 416])
         img = img / 255.0
-        return img, label[0]
+        return img, label
 
 
 if __name__ == "__main__":

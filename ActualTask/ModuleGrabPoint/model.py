@@ -5,34 +5,28 @@ from tensorflow.keras.layers import *
 from tensorflow.python.keras.regularizers import l2
 
 
-def dense_block(units):
-    return Dense(units=units,
-                 kernel_initializer=tf.keras.initializers.truncated_normal(0.0, 0.01),
-                 # kernel_regularizer=l2(5e-4),
-                 activation=LeakyReLU(0.1),
-                 trainable=True)
+def Conv(*args, **kwargs):
+    new_kwargs = {'kernel_regularizer': l2(5e-4),
+                  'padding': 'valid' if kwargs.get('strides') == (2, 2) else 'same'}
+    new_kwargs.update(kwargs)
+
+    return Conv2D(*args, **new_kwargs)
 
 
-def CBLM(filters):
+def CBL(*args, **kwargs):
+    new_kwargs = {'use_bias': False}
+    new_kwargs.update(kwargs)
     blk = tf.keras.Sequential()
-    blk.add(Conv2D(filters=filters,
-                   kernel_size=3,
-                   kernel_regularizer=l2(5e-4),
-                   padding='same'))
+    blk.add(Conv(*args, **new_kwargs))
     blk.add(BatchNormalization())
     blk.add(LeakyReLU(alpha=0.1))
-    blk.add(MaxPool2D())
     return blk
 
 
-def CBL(filters):
+def PCBL(num_filters):
     blk = tf.keras.Sequential()
-    blk.add(Conv2D(filters=filters,
-                   kernel_size=3,
-                   kernel_regularizer=l2(5e-4),
-                   padding='same'))
-    blk.add(BatchNormalization())
-    blk.add(LeakyReLU(alpha=0.1))
+    blk.add(ZeroPadding2D(((1, 0), (1, 0))))
+    blk.add(CBL(num_filters, 3, strides=(2, 2)))
     return blk
 
 
@@ -45,19 +39,31 @@ class GraveModel(tf.keras.Model):
     def __init__(self):
         super().__init__()
 
-        self.cblm_1 = CBLM(32)
+        self.cbl_10 = CBL(16 * 2, 3)
+        self.cbl_11 = CBL(16, 1)
+        self.cbl_12 = CBL(16 * 2, 3)
+        self.add_1 = Add()
+        self.poo_1 = MaxPooling2D(pool_size=4)
 
-        self.cbl_2 = CBL(16)
-        self.cblm_2 = CBLM(16)
+        self.cbl_20 = CBL(8 * 2, 3)
+        self.cbl_21 = CBL(8, 1)
+        self.cbl_22 = CBL(8 * 2, 3)
+        self.add_2 = Add()
+        self.poo_2 = MaxPooling2D(pool_size=4)
 
-        self.cbl_3 = CBL(8)
-        self.cblm_3 = CBLM(8)
+        self.cbl_30 = CBL(4 * 2, 3)
+        self.cbl_31 = CBL(4, 1)
+        self.cbl_32 = CBL(4 * 2, 3)
+        self.add_3 = Add()
+        self.poo_3 = MaxPooling2D(pool_size=4)
 
-        self.cbl_4 = CBL(4)
-        self.cblm_4 = CBLM(4)
+        self.cbl_40 = CBL(2 * 2, 3)
+        self.cbl_41 = CBL(2, 1)
+        self.cbl_42 = CBL(2 * 2, 3)
+        self.add_4 = Add()
+        # self.poo_4 = MaxPooling2D()
 
-        self.cblm_5 = CBLM(2)
-        self.cblm_6 = CBLM(2)
+        self.cbl_final = CBL(2, 3)
 
         self.flatten = Flatten()
 
@@ -72,19 +78,30 @@ class GraveModel(tf.keras.Model):
         self.dense_end = Dense(units=2)
 
     def call(self, inputs, **kwargs):
-        x = self.cblm_1(inputs)
+        x = self.cbl_10(inputs)
+        y = self.cbl_11(x)
+        y = self.cbl_12(y)
+        x = self.add_1([x, y])
+        x = self.poo_1(x)
 
-        x = self.cbl_2(x)
-        x = self.cblm_2(x)
+        x = self.cbl_20(x)
+        y = self.cbl_21(x)
+        y = self.cbl_22(y)
+        x = self.add_2([x, y])
+        x = self.poo_2(x)
 
-        x = self.cbl_3(x)
-        x = self.cblm_3(x)
+        x = self.cbl_30(x)
+        y = self.cbl_31(x)
+        y = self.cbl_32(y)
+        x = self.add_3([x, y])
+        x = self.poo_3(x)
 
-        x = self.cbl_4(x)
-        x = self.cblm_4(x)
+        x = self.cbl_40(x)
+        y = self.cbl_41(x)
+        y = self.cbl_42(y)
+        x = self.add_4([x, y])
 
-        x = self.cblm_5(x)
-        x = self.cblm_6(x)
+        x = self.cbl_final(x)
 
         x = self.flatten(x)
         x = self.dense1(x)
@@ -99,3 +116,4 @@ if __name__ == "__main__":
     test_y = model(test_x)
     model.summary()
     print(test_y.shape)
+    print(test_y)
