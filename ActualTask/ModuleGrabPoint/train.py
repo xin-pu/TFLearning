@@ -5,9 +5,9 @@ from ActualTask.ModuleGrabPoint.dataset import GrabDataSet
 from ActualTask.ModuleGrabPoint.loss import Loss
 from ActualTask.ModuleGrabPoint.model import GraveModel
 
-init_learning_rate = 0.001
+init_learning_rate = 0.01
 size_pattern = 416
-batch_size = 4
+batch_size = 2
 model_dir = r'D:\DataSets\GrabModule\Model'
 
 # Step 1, Prepare Data
@@ -22,12 +22,12 @@ print("Train num:{0}\tVal num:{1}".format(num_train, num_test))
 model = GraveModel()
 
 checkpoint = ModelCheckpoint(model_dir,
-                             monitor='val_mean_squared_error',
+                             monitor='val_loss',
                              save_weights_only=False,
                              save_best_only=False,
                              period=5)
 
-reduce_lr = ReduceLROnPlateau(monitor='val_mean_squared_error',
+reduce_lr = ReduceLROnPlateau(monitor='val_loss',
                               factor=0.5,
                               patience=2,
                               verbose=1)
@@ -39,9 +39,8 @@ early_stopping = EarlyStopping(monitor='val_loss',
 
 loss = Loss()
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=init_learning_rate, amsgrad=True),
-              loss=tf.keras.losses.mean_absolute_error,
-              metrics=[tf.keras.metrics.mean_squared_error,
-                       tf.keras.metrics.mean_absolute_percentage_error])
+              loss=tf.keras.losses.mean_squared_error,
+              metrics=[tf.keras.metrics.mean_absolute_error])
 
 model.fit(
     train_dataset.train_dataset,
