@@ -22,12 +22,12 @@ print("Train num:{0}\tVal num:{1}".format(num_train, num_test))
 model = GraveModel()
 
 checkpoint = ModelCheckpoint(model_dir,
-                             monitor='val_loss',
+                             monitor='val_mean_squared_error',
                              save_weights_only=False,
                              save_best_only=False,
                              period=5)
 
-reduce_lr = ReduceLROnPlateau(monitor='val_loss',
+reduce_lr = ReduceLROnPlateau(monitor='val_mean_squared_error',
                               factor=0.5,
                               patience=2,
                               verbose=1)
@@ -39,14 +39,15 @@ early_stopping = EarlyStopping(monitor='val_loss',
 
 loss = Loss()
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=init_learning_rate, amsgrad=True),
-              loss=loss,
-              metrics=[tf.keras.metrics.mean_squared_error])
+              loss=tf.keras.losses.mean_absolute_error,
+              metrics=[tf.keras.metrics.mean_squared_error,
+                       tf.keras.metrics.mean_absolute_percentage_error])
 
 model.fit(
     train_dataset.train_dataset,
     validation_data=train_dataset.test_dataset,
-    epochs=25,
+    epochs=50,
     initial_epoch=0,
-    callbacks=[reduce_lr])
+    callbacks=[reduce_lr, checkpoint])
 
 model.save(model_dir, overwrite=True, include_optimizer=False)
