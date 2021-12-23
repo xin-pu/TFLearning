@@ -61,3 +61,8 @@ result.GetArray(out float[] data);
 var max = data.ToList().IndexOf(data.Max()) + 1;
 return max;
 ```
+
+
+- 优先调整 卷积核数，激活方法。
+- 学习率迭代因子，定义0.5以上比较合适。
+- 卷积层数量更多，收敛更快

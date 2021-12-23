@@ -39,9 +39,9 @@ class GraveModel(tf.keras.Model):
     def __init__(self):
         super().__init__()
 
-        self.cbl_10 = CBL(16 * 2, 3)
-        self.cbl_11 = CBL(16, 1)
-        self.cbl_12 = CBL(16 * 2, 3)
+        self.cbl_10 = CBL(32 * 2, 3)
+        self.cbl_11 = CBL(32, 1)
+        self.cbl_12 = CBL(32 * 2, 3)
         self.add_1 = Add()
         self.poo_1 = MaxPooling2D(pool_size=4)
 
@@ -57,23 +57,9 @@ class GraveModel(tf.keras.Model):
         self.add_3 = Add()
         self.poo_3 = MaxPooling2D(pool_size=4)
 
-        self.cbl_40 = CBL(2 * 2, 3)
-        self.cbl_41 = CBL(2, 1)
-        self.cbl_42 = CBL(2 * 2, 3)
-        self.add_4 = Add()
-        # self.poo_4 = MaxPooling2D()
-
         self.cbl_final = CBL(2, 3)
 
         self.flatten = Flatten()
-
-        self.dense1 = Dense(units=32,
-                            activation=tf.nn.leaky_relu,
-                            kernel_regularizer=l2(5e-4))
-
-        self.dense2 = Dense(units=8,
-                            activation=tf.nn.leaky_relu,
-                            kernel_regularizer=l2(5e-4))
 
         self.dense_end = Dense(units=2)
 
@@ -96,17 +82,11 @@ class GraveModel(tf.keras.Model):
         x = self.add_3([x, y])
         x = self.poo_3(x)
 
-        x = self.cbl_40(x)
-        y = self.cbl_41(x)
-        y = self.cbl_42(y)
-        x = self.add_4([x, y])
-
         x = self.cbl_final(x)
 
         x = self.flatten(x)
-        x = self.dense1(x)
-        x = self.dense2(x)
         x = self.dense_end(x)
+
         return x
 
 
