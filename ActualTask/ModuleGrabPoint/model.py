@@ -25,7 +25,7 @@ def CBL(*args, **kwargs):
 
 def PCBL(num_filters):
     blk = tf.keras.Sequential()
-    blk.add(ZeroPadding2D(((1, 0), (1, 0))))
+    blk.add(Conv2D(1, kernel_size=1, padding='valid'))
     blk.add(CBL(num_filters, 3, strides=(2, 2)))
     return blk
 
@@ -38,53 +38,22 @@ class GraveModel(tf.keras.Model):
 
     def __init__(self):
         super().__init__()
-
-        self.cbl_10 = CBL(32 * 2, 3)
-        self.cbl_11 = CBL(32, 1)
-        self.cbl_12 = CBL(32 * 2, 3)
-        self.add_1 = Add()
-        self.poo_1 = MaxPooling2D(pool_size=4)
-
-        self.cbl_20 = CBL(8 * 2, 3)
-        self.cbl_21 = CBL(8, 1)
-        self.cbl_22 = CBL(8 * 2, 3)
-        self.add_2 = Add()
-        self.poo_2 = MaxPooling2D(pool_size=4)
-
-        self.cbl_30 = CBL(4 * 2, 3)
-        self.cbl_31 = CBL(4, 1)
-        self.cbl_32 = CBL(4 * 2, 3)
-        self.add_3 = Add()
-        self.poo_3 = MaxPooling2D(pool_size=4)
-
-        self.cbl_final = CBL(2, 3)
-
+        self.pcbl1 = PCBL(32)
+        self.pcbl2 = PCBL(16)
+        self.pcbl3 = PCBL(4)
+        self.pcbl4 = PCBL(2)
         self.flatten = Flatten()
-
+        self.dense1 = Dense(units=32, activation=tf.nn.relu, kernel_regularizer=l2(5e-4))
         self.dense_end = Dense(units=2)
 
     def call(self, inputs, **kwargs):
-        x = self.cbl_10(inputs)
-        y = self.cbl_11(x)
-        y = self.cbl_12(y)
-        x = self.add_1([x, y])
-        x = self.poo_1(x)
-
-        x = self.cbl_20(x)
-        y = self.cbl_21(x)
-        y = self.cbl_22(y)
-        x = self.add_2([x, y])
-        x = self.poo_2(x)
-
-        x = self.cbl_30(x)
-        y = self.cbl_31(x)
-        y = self.cbl_32(y)
-        x = self.add_3([x, y])
-        x = self.poo_3(x)
-
-        x = self.cbl_final(x)
+        x = self.pcbl1(inputs)
+        x = self.pcbl2(x)
+        x = self.pcbl3(x)
+        x = self.pcbl4(x)
 
         x = self.flatten(x)
+        x = self.dense1(x)
         x = self.dense_end(x)
 
         return x
@@ -96,4 +65,9 @@ if __name__ == "__main__":
     test_y = model(test_x)
     model.summary()
     print(test_y.shape)
+    print(test_y)
+
+    checkpoint = tf.train.Checkpoint(myModel=model)
+    checkpoint.restore(tf.train.latest_checkpoint(r'D:\DataSets\GrabModule\ResModel2'))
+    test_y = model(test_x)
     print(test_y)
