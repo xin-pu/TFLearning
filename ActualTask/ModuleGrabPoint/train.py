@@ -8,11 +8,11 @@ from ActualTask.ModuleGrabPoint.model import GraveModel
 init_learning_rate = 1E-3
 size_pattern = 416
 batch_size = 2
-model_dir = r'D:\DataSets\GrabModule\ResModel2'
+model_dir = r'D:\DataSets\GrabModule\ResModel3'
 
 # Step 1, Prepare Data
 train_dataset = GrabDataSet(batch_size=batch_size,
-                            val_per=0.4)
+                            val_per=0.33)
 
 num_train = len(train_dataset.train_dataset)
 num_test = len(train_dataset.test_dataset)
@@ -32,7 +32,7 @@ checkpoint = ModelCheckpoint(model_dir,
 
 reduce_lr = ReduceLROnPlateau(monitor='val_metric',
                               factor=0.5,
-                              patience=5,
+                              patience=8,
                               verbose=1,
                               mode='min')
 
@@ -41,10 +41,6 @@ early_stopping = EarlyStopping(monitor='val_metric',
                                verbose=1,
                                mode='min')
 
-# model.load_weights(model_dir)
-# test_x = tf.ones([1, 416, 416, 1])
-# model(test_x)
-# model.save(model_dir)
 
 loss = Loss()
 metric = Metric()
@@ -56,8 +52,8 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=init_learning_rat
 model.fit(
     train_dataset.train_dataset,
     validation_data=train_dataset.test_dataset,
-    epochs=100,
+    epochs=500,
     initial_epoch=0,
-    callbacks=[reduce_lr, checkpoint, early_stopping])
+    callbacks=[reduce_lr, checkpoint])
 
 model.save(model_dir, overwrite=True, include_optimizer=False)
