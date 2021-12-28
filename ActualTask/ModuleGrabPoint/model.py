@@ -38,10 +38,10 @@ class GraveModel(tf.keras.Model):
 
     def __init__(self):
         super().__init__()
-        self.pcbl1 = PCBL(64)
-        self.pcbl2 = PCBL(32)
-        self.pcbl3 = PCBL(16)
-        self.pcbl4 = PCBL(8)
+        self.pcbl1 = PCBL(32)
+        self.pcbl2 = PCBL(16)
+        self.pcbl3 = PCBL(8)
+        self.pcbl4 = PCBL(4)
         self.flatten = Flatten()
         self.dense1 = Dense(units=32, activation=tf.nn.relu, kernel_regularizer=l2(5e-4))
         self.dense_end = Dense(units=2)

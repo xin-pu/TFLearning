@@ -2,7 +2,7 @@ import tensorflow as tf
 
 from ActualTask.ModuleGrabPoint.model import GraveModel
 
-model_dir = r'D:\DataSets\GrabModule\ResModel3'
+model_dir = r'D:\DataSets\GrabModule\Model'
 
 model = GraveModel()
 

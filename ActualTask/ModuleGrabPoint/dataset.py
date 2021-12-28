@@ -3,9 +3,9 @@ import csv
 import tensorflow as tf
 
 
-def get_dataset_list():
+def get_dataset_list(csv_file):
     filenames, res = [], []
-    f = open(r'D:\DataSets\GrabModule\info.csv', 'r')
+    f = open(csv_file, 'r')
     with f:
         reader = csv.reader(f)
         i = 0
@@ -14,7 +14,7 @@ def get_dataset_list():
             if i == 1:
                 continue
             filenames.append(row[0])
-            res.append([float(row[1]), float(row[2])])
+            res.append([float(row[5]), float(row[6])])
     return filenames, res
 
 
@@ -26,9 +26,11 @@ class GrabDataSet:
     batch_size = 24
 
     def __init__(self,
+                 csv_file,
                  batch_size=24,
                  val_per=0.3):
         self.batch_size = batch_size
+        self.csv_file = csv_file
         train_dataset = self.get_data()
 
         data_count = len(train_dataset)
@@ -38,8 +40,7 @@ class GrabDataSet:
         self.test_dataset = train_dataset.take(split_size)
 
     def get_data(self):
-        png_files, labels = get_dataset_list()
-        print(labels)
+        png_files, labels = get_dataset_list(self.csv_file)
         train_dataset = tf.data.Dataset.from_tensor_slices((png_files, labels))
         train_dataset = train_dataset.map(
             map_func=self.decode_and_resize,
@@ -60,8 +61,16 @@ class GrabDataSet:
 
 
 if __name__ == "__main__":
-    data = GrabDataSet(batch_size=12,
-                       val_per=0.2)
-    num_train = len(data.train_dataset)
-    num_test = len(data.test_dataset)
+    val_data = GrabDataSet(r'D:\DataSets\val\info.csv',
+                           batch_size=12,
+                           val_per=0)
+    num_train = len(val_data.train_dataset)
+    num_test = len(val_data.test_dataset)
+    print("Train num:{0}\tVal num:{1}".format(num_train, num_test))
+
+    train_data = GrabDataSet(r'D:\DataSets\train\info.csv',
+                             batch_size=12,
+                             val_per=0)
+    num_train = len(train_data.train_dataset)
+    num_test = len(train_data.test_dataset)
     print("Train num:{0}\tVal num:{1}".format(num_train, num_test))
