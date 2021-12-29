@@ -1,10 +1,11 @@
 import tensorflow as tf
 
-from ActualTask.ModuleGrabPoint.model import GraveModel
+from ActualTask.ModuleGrabPoint.Nets.model import GraveModel
+from ActualTask.ModuleGrabPoint.Nets.resnet import get_net
 
 model_dir = r'D:\DataSets\GrabModule\Model'
 
-model = GraveModel()
+model = get_net((416, 416), 2)
 
 model.load_weights(model_dir)
 test_x = tf.ones([1, 416, 416, 1])

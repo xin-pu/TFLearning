@@ -3,7 +3,7 @@ import csv
 import tensorflow as tf
 
 
-def get_dataset_list(csv_file):
+def get_dataset_list(csv_file, mode):
     filenames, res = [], []
     f = open(csv_file, 'r')
     with f:
@@ -14,7 +14,11 @@ def get_dataset_list(csv_file):
             if i == 1:
                 continue
             filenames.append(row[0])
-            res.append([float(row[5]), float(row[6])])
+
+            if mode == 4:
+                res.append([float(row[1]), float(row[2]), float(row[3]), float(row[4])])
+            else:
+                res.append([float(row[5]), float(row[6])])
     return filenames, res
 
 
@@ -28,7 +32,9 @@ class GrabDataSet:
     def __init__(self,
                  csv_file,
                  batch_size=24,
-                 val_per=0.3):
+                 val_per=0.3,
+                 mode=1):
+        self.mode = mode
         self.batch_size = batch_size
         self.csv_file = csv_file
         train_dataset = self.get_data()
@@ -40,7 +46,7 @@ class GrabDataSet:
         self.test_dataset = train_dataset.take(split_size)
 
     def get_data(self):
-        png_files, labels = get_dataset_list(self.csv_file)
+        png_files, labels = get_dataset_list(self.csv_file, self.mode)
         train_dataset = tf.data.Dataset.from_tensor_slices((png_files, labels))
         train_dataset = train_dataset.map(
             map_func=self.decode_and_resize,
